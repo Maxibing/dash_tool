@@ -14,6 +14,6 @@ ThroughPut = ["UpLink", "DownLink"]
 
 DATA_TYPE_CHECKLIST = {"ADC" : ADC, "ThroughPut": ThroughPut}
 
-SENSOR = r"C:\Users\DELL\Desktop\demo\dash\dash_tool-master\SENSOR.csv"
+SENSOR = r"C:\Users\DELL\Desktop\dash\dash_tool-master\SENSOR.csv"
 
-VDD =  r"C:\Users\DELL\Desktop\demo\dash\dash_tool-master\VDD.csv"
+VDD =  r"C:\Users\DELL\Desktop\dash\dash_tool-master\VDD.csv"

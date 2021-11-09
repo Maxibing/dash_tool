@@ -79,14 +79,14 @@ def l1_value_update(DataType):
 @app.callback(Output('table', 'columns'), Output('table', 'data'), [Input('DataType', 'value'), Input('l1_options', 'value')])
 def table_columns_update(DataType, l1_options):
     if DataType == "ADC" and l1_options == "Sensor":
-        df = get_data(SENSOR)
+        df = get_table_data(SENSOR)
 
     if DataType == "ADC" and l1_options == "VDD":
-        df = get_data(VDD)
+        df = get_table_data(VDD)
 
     return [{'name': i, 'id': i} for i in df.columns], df.to_dict('records')
 
-def get_data(path):
+def get_table_data(path):
     df = pd.read_csv(path)
     return df
 
