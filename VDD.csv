@@ -1,0 +1,4 @@
+TEST_DATE, TEST_VERSION, VOLTAGE_RANGE, RESULT, NOTE
+2021/11/17, n6kmpsdk_master_W21110511, 2.4-4.2, adc.csv,
+2021/11/18, n6kmpsdk_master_W21110511, 2.4-4.2, adc.csv,
+2021/11/19, n6kmpsdk_master_W21110511, 2.4-4.2, adc.csv,
