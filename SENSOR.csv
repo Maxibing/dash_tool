@@ -1,4 +1,4 @@
-TEST_DATE, TEST_VERSION, VOLTAGE_RANGE, RESULT
-2021/11/17, n6kmpsdk_master_W21110511, 0-1.9, adc.csv
-2021/11/18, n6kmpsdk_master_W21110511, 0-1.9, adc.csv
-2021/11/19, n6kmpsdk_master_W21110511, 0-1.9, adc.csv
+Date, Version, Voltage_Range, Data_Source, X_Axis, Y_Axis
+2021/11/07, n6kmpsdk_master_W21110511, 0V-1.9V, D:\project\dash_tool\adc_1107.csv\adc_1107.csv, Set, Actual_Error
+2021/11/08, n6kmpsdk_master_W21110512, 0V-1.9V, D:\project\dash_tool\adc_1107.csv\adc_1108.csv, Set, Actual_Error
+2021/11/09, n6kmpsdk_master_W21110513, 0V-1.9V, D:\project\dash_tool\adc_1107.csv\adc_1109.csv, Set, Actual_Error

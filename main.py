@@ -19,10 +19,12 @@ from global_parameters import *
 
 app = dash.Dash()
 
-# 页面布局
+'''
+页面布局
+'''
 app.layout = html.Div(children=[
     # 标题
-    html.H1(children=TITLE, style={"color": "green"}),
+    html.H1(children=DASH_TITLE, style={"color": "green"}),
     # 说明
     html.Div(
         children='''Dash: A web application to present nurlink test data.''',
@@ -40,12 +42,12 @@ app.layout = html.Div(children=[
                               options=[{
                                   'label': i,
                                   'value': i
-                              } for i in list(DATA_TYPE_CHECKLIST.keys())],
-                              value=list(DATA_TYPE_CHECKLIST.keys())[0]),
+                              } for i in DATA_TYPE_CHECKLIST],
+                              value=DATA_TYPE_CHECKLIST[0]),
                  style={
                      'margin-top': 10,
                      'width': '10%'
-                 }),
+        }),
     ]),
     # 分隔线
     html.Hr(),
@@ -53,39 +55,69 @@ app.layout = html.Div(children=[
     dcc.RadioItems(id='l1_options'),
     # 表格
     dash_table.DataTable(id='table',
-                        columns = [],
-                        data = [],
-                        row_selectable="multi",
-                        selected_rows=[],
-                        page_action="native",
-                        page_current= 0,
-                        page_size= 10,
-                        ),
+                         columns=[],
+                         data=[],
+                         row_selectable="multi",
+                         selected_rows=[],
+                         page_action="native",
+                         page_current=0,
+                         page_size=10,
+                         ),
+    # 画图
+    dcc.Graph(id="data_display", figure={})
 ])
 
 
+'''
+回调函数
+'''
 # 第一级选项回调
+
+
 @app.callback(Output('l1_options', 'options'), [Input('DataType', 'value')])
-def l1_options_update(value):
-    return [{'label': i, 'value': i} for i in DATA_TYPE_CHECKLIST[value]]
+def l1_options_update(DataType):
+    return [{'label': i, 'value': i} for i in eval(DataType)]
 
 
 # 第一级选项默认值
 @app.callback(Output('l1_options', 'value'), [Input('DataType', 'value')])
 def l1_value_update(DataType):
-    return  DATA_TYPE_CHECKLIST[DataType][0]
+    return eval(DataType)[0]
 
 # 表格回调
-@app.callback(Output('table', 'columns'), Output('table', 'data'), [Input('DataType', 'value'), Input('l1_options', 'value')])
-def table_columns_update(DataType, l1_options):
-    if DataType == "ADC" and l1_options == "Sensor":
-        df = get_table_data(SENSOR)
+@app.callback(Output('table', 'columns'), Output('table', 'data'), [Input('l1_options', 'value')])
+def table_update(l1_options):
+    try:
+        df = get_table_data(eval(l1_options))
+        return [{'name': i, 'id': i} for i in df.columns], df.to_dict('records')
+    except:
+        return [], []
 
-    if DataType == "ADC" and l1_options == "VDD":
-        df = get_table_data(VDD)
+# 更新绘图
+@app.callback(Output("data_display", "figure"), [Input("table", "selected_rows"), Input("table", "data")])
+def data_graph_update(selected_rows, data):
+    print(selected_rows)
+    print(data)
+    if len(selected_rows) == []:
+        return
+    
+    traces = []
+    for i in selected_rows:
+        df = get_table_data(data[i]["Data_Source"])
 
-    return [{'name': i, 'id': i} for i in df.columns], df.to_dict('records')
+        traces.append(go.Scatter(x=df["Set"], y=df["Actual_Error"], name=dfVersionz["Version"]))
 
+
+
+    design = go.Layout(xaxis=dict(title="Set"),
+                       yaxis=dict(title="Actual_Error"))
+
+    return dict(data=traces, layout=design)
+
+
+'''
+其他接口
+'''
 def get_table_data(path):
     df = pd.read_csv(path)
     return df
@@ -93,4 +125,4 @@ def get_table_data(path):
 
 if __name__ == '__main__':
     app.run_server(host="192.168.29.128", debug=True)
-    # app.run_server(host="192.168.0.107", debug=True)
+    # app.run_server(host="192.168.0.109", debug=True)

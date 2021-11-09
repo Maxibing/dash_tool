@@ -5,15 +5,19 @@
 @Date     :2021/11/08 20:58:52
 @Author      :xbMa
 '''
+# 网站标题
+DASH_TITLE = "NurLink 测试数据"
 
-TITLE = "NurLink 测试数据"
+# 一级菜单
+DATA_TYPE_CHECKLIST = ["ADC", "ThroughPut"]
 
-ADC = ["Sensor", "VDD"]
-
+# 二级菜单，与一级菜单元素对应
+ADC = ["ADC_CHANNEL_1", "ADC_VDD"]
 ThroughPut = ["UpLink", "DownLink"]
 
-DATA_TYPE_CHECKLIST = {"ADC" : ADC, "ThroughPut": ThroughPut}
+# 表格显示的测试数据源，与耳机菜单元素对应
+ADC_CHANNEL_1 = r"D:\project\dash_tool\SENSOR.csv"
+ADC_VDD =  r"D:\project\dash_tool\VDD.csv"
 
-SENSOR = r"C:\Users\DELL\Desktop\dash\dash_tool-master\SENSOR.csv"
-
-VDD =  r"C:\Users\DELL\Desktop\dash\dash_tool-master\VDD.csv"
+# ADC_CHANNEL_1 = r"C:\Users\DELL\Desktop\dash\dash_tool-master\SENSOR.csv"
+# ADC_VDD =  r"C:\Users\DELL\Desktop\dash\dash_tool-master\VDD.csv"
