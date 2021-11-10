@@ -14,13 +14,17 @@ import dash_core_components as dcc  # 交互式组件
 import dash_html_components as html  # 代码转html
 
 from dash.dependencies import Input, Output  # 回调
-
 from global_parameters import *
+from mysql_operation import *
 
-app = dash.Dash()
+# 获取菜单
+DATA_SUMMARY = get_category_summary(mysql_connect())
+DATA_TYPE_CHECKLIST = get_main_and_sub_module(DATA_SUMMARY)
+
 '''
 页面布局
 '''
+app = dash.Dash()
 app.layout = html.Div(children=[
     # 标题
     html.H1(children=DASH_TITLE, style={"color": "green"}),
@@ -41,12 +45,12 @@ app.layout = html.Div(children=[
                               options=[{
                                   'label': i,
                                   'value': i
-                              } for i in DATA_TYPE_CHECKLIST],
-                              value=DATA_TYPE_CHECKLIST[0]),
+                              } for i in DATA_TYPE_CHECKLIST.keys()],
+                              value=list(DATA_TYPE_CHECKLIST.keys())[0]),
                  style={
                      'margin-top': 10,
                      'width': '10%'
-                 }),
+        }),
     ]),
     # 分隔线
     html.Hr(),
@@ -74,13 +78,13 @@ app.layout = html.Div(children=[
 # 第一级选项回调
 @app.callback(Output('l1_options', 'options'), [Input('DataType', 'value')])
 def l1_options_update(DataType):
-    return [{'label': i, 'value': i} for i in eval(DataType)]
+    return [{'label': i, 'value': i} for i in DATA_TYPE_CHECKLIST[DataType]]
 
 
 # 第一级选项默认值
 @app.callback(Output('l1_options', 'value'), [Input('DataType', 'value')])
 def l1_value_update(DataType):
-    return eval(DataType)[0]
+    return DATA_TYPE_CHECKLIST[DataType][0]
 
 
 # 表格回调
@@ -88,7 +92,7 @@ def l1_value_update(DataType):
               [Input('l1_options', 'value')])
 def table_update(l1_options):
     try:
-        df = get_table_data(eval(l1_options))
+        df = get_table_data(l1_options)
         return [{
             'name': i,
             'id': i
@@ -100,36 +104,28 @@ def table_update(l1_options):
 # 更新绘图
 @app.callback(Output("data_display", "figure"),
               [Input("table", "selected_rows"),
-               Input("table", "data")])
-def data_graph_update(selected_rows, data):
+               Input("table", "data"),
+               Input('l1_options', 'value')])
+def data_graph_update(selected_rows, data, sub_module):
     if len(selected_rows) == []:
         return
 
     traces = []
     for i in selected_rows:
-        df = get_table_data(data[i]["Data_Source"])
+        _data = get_draw_data(data[i], sub_module)
 
         traces.append(
-            go.Scatter(x=df["Set"],
-                       y=df["Actual_Error"],
-                       name=data[i]["Version"]))
-
-    design = go.Layout(xaxis=dict(title="Set"),
-                       yaxis=dict(title="Actual_Error"))
+            go.Scatter(x=_data["origin_data"][_data["x"]],
+                       y=_data["origin_data"][_data["y"]],
+                       name=data[i][_data["plot_title"]]))
+    xy_title = DATA_SUMMARY[DATA_SUMMARY["sub_module"]
+                            == sub_module]["draw_parameters"][0].split(",")
+    design = go.Layout(xaxis=dict(title=xy_title[0]),
+                       yaxis=dict(title=xy_title[1]))
 
     return dict(data=traces, layout=design)
 
 
-'''
-其他接口
-'''
-
-
-def get_table_data(path):
-    df = pd.read_csv(path)
-    return df
-
-
 if __name__ == '__main__':
-    app.run_server(host="192.168.29.128", port=8050, debug=True)
-    # app.run_server(host="192.168.0.109", debug=True)
+    # app.run_server(host="192.168.29.128", port=8050, debug=True)
+    app.run_server(port=8010, debug=True)
