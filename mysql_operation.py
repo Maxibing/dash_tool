@@ -71,20 +71,6 @@ def get_table_data(table):
     return pd.read_sql(sql, con=mysql_connect())
 
 
-def get_draw_data(sub_table, sub_module):
-    sub_record = DATA_SUMMARY[DATA_SUMMARY["sub_module"] == sub_module]
-    figure_type = sub_record["figure_type"][0]
-    data_type = sub_record["data_type"][0]
-    plot_title = sub_record["plot_title"][0]
-    if figure_type == None and data_type == "csv":
-        x_type, y_type = sub_record["draw_parameters"][0].split(",")
-        origin_data = pd.read_csv(sub_table["test_data"])
-        result = {"x": x_type, "y": y_type,
-                  "plot_title": plot_title, "origin_data": origin_data}
-
-        return result
-
-
 if __name__ == "__main__":
     mysql = mysql_connect()
     df_summary = get_category_summary(mysql)
