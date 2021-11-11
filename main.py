@@ -114,8 +114,6 @@ def data_graph_update(selected_rows, data, sub_module):
     traces = []
     for i in selected_rows:
         _data = get_draw_data(data[i], sub_module)
-        _x = _data["origin_data"][_data["x"]]
-        _name = data[i][_data["plot_title"]]
 
         traces.append(
             go.Scatter(x=_data["origin_data"][_data["x"]],
@@ -158,5 +156,5 @@ def get_draw_data(sub_table, sub_module):
 
 
 if __name__ == '__main__':
-    app.run_server(host="192.168.29.128", port=8010, debug=True)
-    # app.run_server(port=8023, debug=True)
+    # app.run_server(host="192.168.29.128", port=8010, debug=True)
+    app.run_server(port=8900, debug=True)
