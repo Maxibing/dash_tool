@@ -72,10 +72,14 @@ def get_table_data(table):
 
 
 if __name__ == "__main__":
-    mysql = mysql_connect()
-    df_summary = get_category_summary(mysql)
-    sql = f"SELECT * FROM adc_channel_1"
-    file_path = pd.read_sql(sql, con=mysql)["test_data"][0]
-    print(file_path)
-    data = pd.read_csv(file_path)
-    print(data)
+    # mysql = mysql_connect()
+    # df_summary = get_category_summary(mysql)
+    # sql = f"SELECT * FROM adc_channel_1"
+    # file_path = pd.read_sql(sql, con=mysql)["test_data"][0]
+    # print(file_path)
+    # data = pd.read_csv(file_path)
+    # print(data)
+    DATA_SUMMARY = get_category_summary(mysql_connect())
+    sub_record = DATA_SUMMARY[DATA_SUMMARY["sub_module"] == "ADC_VDD"]
+    print(sub_record)
+    print(sub_record["figure_type"].values[0])

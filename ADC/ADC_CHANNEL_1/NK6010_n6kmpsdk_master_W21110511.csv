@@ -1,4 +1,4 @@
-volt_input(V),volt_measured(V),Maximum_error_range(V),actual_error(V),over_range,vdd(v)
+volt_input(V),volt_measured(V),Maximum_error_range(V),actual_error(V),over_range,vdd(V)
 0.000000,0.000412,0.015000,0.000412,no,3.325572
 0.050000,0.052309,0.015750,0.002309,no,3.325339
 0.100000,0.100038,0.016500,0.000038,no,3.326041
@@ -37,4 +37,4 @@ volt_input(V),volt_measured(V),Maximum_error_range(V),actual_error(V),over_range
 1.750000,1.748569,0.041250,0.001431,no,3.325806
 1.800000,1.796864,0.042000,0.003136,no,3.325572
 1.850000,1.848131,0.092000,0.001869,no,3.326041
-1.900000,1.867828,0.142000,0.032172,no,3.326746
+1.900000,1.867828,0.142000,0.032172,no,3.32674

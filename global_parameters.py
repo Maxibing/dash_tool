@@ -15,6 +15,9 @@ MySql_Summary_Category = "summary_test_data_category"
 # 网站标题
 DASH_TITLE = "NurLink 测试数据"
 
+# 存储地址
+MAIN_PATH = "D:\project\dash_tool"
+
 # 一级菜单
 # DATA_TYPE_CHECKLIST = ["ADC", "ThroughPut"]
 

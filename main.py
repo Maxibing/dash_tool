@@ -14,6 +14,7 @@ import dash_core_components as dcc  # 交互式组件
 import dash_html_components as html  # 代码转html
 
 from dash.dependencies import Input, Output  # 回调
+from pathlib import Path
 from global_parameters import *
 from mysql_operation import *
 
@@ -88,7 +89,7 @@ def l1_value_update(DataType):
 
 
 # 表格回调
-@app.callback(Output('table', 'columns'), Output('table', 'data'),
+@app.callback(Output('table', 'columns'), Output('table', 'data'), Output('table', 'selected_rows'),
               [Input('l1_options', 'value')])
 def table_update(l1_options):
     try:
@@ -96,9 +97,9 @@ def table_update(l1_options):
         return [{
             'name': i,
             'id': i
-        } for i in df.columns], df.to_dict('records')
+        } for i in df.columns], df.to_dict('records'), []
     except:
-        return [], []
+        return [], [], []
 
 
 # 更新绘图
@@ -113,27 +114,30 @@ def data_graph_update(selected_rows, data, sub_module):
     traces = []
     for i in selected_rows:
         _data = get_draw_data(data[i], sub_module)
+        _x=_data["origin_data"][_data["x"]]
+        _name=data[i][_data["plot_title"]]
 
         traces.append(
             go.Scatter(x=_data["origin_data"][_data["x"]],
                        y=_data["origin_data"][_data["y"]],
                        name=data[i][_data["plot_title"]]))
     xy_title = DATA_SUMMARY[DATA_SUMMARY["sub_module"]
-                            == sub_module]["draw_parameters"][0].split(",")
-    design = go.Layout(xaxis=dict(title=xy_title[0]),
-                       yaxis=dict(title=xy_title[1]))
+                            == sub_module]["draw_parameters"].values[0].split(",")
+    design = go.Layout(xaxis=dict(title=xy_title[0], titlefont=dict(color="red",family="STHeiti", size=15)),
+                       yaxis=dict(title=xy_title[1], titlefont=dict(color="red",family="STHeiti", size=15)),
+                       title=dict(text=sub_module, font=dict(color="green",family="STHeiti", size=20)))
 
     return dict(data=traces, layout=design)
 
 
 def get_draw_data(sub_table, sub_module):
     sub_record = DATA_SUMMARY[DATA_SUMMARY["sub_module"] == sub_module]
-    figure_type = sub_record["figure_type"][0]
-    data_type = sub_record["data_type"][0]
-    plot_title = sub_record["plot_title"][0]
+    figure_type = sub_record["figure_type"].values[0]
+    data_type = sub_record["data_type"].values[0]
+    plot_title = sub_record["plot_title"].values[0]
     if figure_type == None and data_type == "csv":
-        x_type, y_type = sub_record["draw_parameters"][0].split(",")
-        origin_data = pd.read_csv(sub_table["test_data"])
+        x_type, y_type = sub_record["draw_parameters"].values[0].split(",")
+        origin_data = pd.read_csv(Path(MAIN_PATH) / sub_table["test_data"])
         result = {"x": x_type, "y": y_type,
                   "plot_title": plot_title, "origin_data": origin_data}
 
@@ -141,5 +145,5 @@ def get_draw_data(sub_table, sub_module):
 
 
 if __name__ == '__main__':
-    # app.run_server(host="192.168.29.128", port=8050, debug=True)
-    app.run_server(port=6513, debug=True)
+    app.run_server(host="192.168.29.128", port=8010, debug=True)
+    # app.run_server(port=8023, debug=True)
