@@ -21,7 +21,6 @@ from mysql_operation import *
 # 获取菜单
 DATA_SUMMARY = get_category_summary(mysql_connect())
 DATA_TYPE_CHECKLIST = get_main_and_sub_module(DATA_SUMMARY)
-
 '''
 页面布局
 '''
@@ -51,7 +50,7 @@ app.layout = html.Div(children=[
                  style={
                      'margin-top': 10,
                      'width': '10%'
-        }),
+                 }),
     ]),
     # 分隔线
     html.Hr(),
@@ -89,8 +88,8 @@ def l1_value_update(DataType):
 
 
 # 表格回调
-@app.callback(Output('table', 'columns'), Output('table', 'data'), Output('table', 'selected_rows'),
-              [Input('l1_options', 'value')])
+@app.callback(Output('table', 'columns'), Output('table', 'data'),
+              Output('table', 'selected_rows'), [Input('l1_options', 'value')])
 def table_update(l1_options):
     try:
         df = get_table_data(l1_options)
@@ -103,10 +102,11 @@ def table_update(l1_options):
 
 
 # 更新绘图
-@app.callback(Output("data_display", "figure"),
-              [Input("table", "selected_rows"),
-               Input("table", "data"),
-               Input('l1_options', 'value')])
+@app.callback(Output("data_display", "figure"), [
+    Input("table", "selected_rows"),
+    Input("table", "data"),
+    Input('l1_options', 'value')
+])
 def data_graph_update(selected_rows, data, sub_module):
     if len(selected_rows) == []:
         return
@@ -114,18 +114,27 @@ def data_graph_update(selected_rows, data, sub_module):
     traces = []
     for i in selected_rows:
         _data = get_draw_data(data[i], sub_module)
-        _x=_data["origin_data"][_data["x"]]
-        _name=data[i][_data["plot_title"]]
+        _x = _data["origin_data"][_data["x"]]
+        _name = data[i][_data["plot_title"]]
 
         traces.append(
             go.Scatter(x=_data["origin_data"][_data["x"]],
                        y=_data["origin_data"][_data["y"]],
                        name=data[i][_data["plot_title"]]))
-    xy_title = DATA_SUMMARY[DATA_SUMMARY["sub_module"]
-                            == sub_module]["draw_parameters"].values[0].split(",")
-    design = go.Layout(xaxis=dict(title=xy_title[0], titlefont=dict(color="red",family="STHeiti", size=15)),
-                       yaxis=dict(title=xy_title[1], titlefont=dict(color="red",family="STHeiti", size=15)),
-                       title=dict(text=sub_module, font=dict(color="green",family="STHeiti", size=20)))
+    xy_title = DATA_SUMMARY[DATA_SUMMARY["sub_module"] ==
+                            sub_module]["draw_parameters"].values[0].split(",")
+    design = go.Layout(xaxis=dict(title=xy_title[0],
+                                  titlefont=dict(color="red",
+                                                 family="STHeiti",
+                                                 size=15)),
+                       yaxis=dict(title=xy_title[1],
+                                  titlefont=dict(color="red",
+                                                 family="STHeiti",
+                                                 size=15)),
+                       title=dict(text=sub_module,
+                                  font=dict(color="green",
+                                            family="STHeiti",
+                                            size=20)))
 
     return dict(data=traces, layout=design)
 
@@ -138,8 +147,12 @@ def get_draw_data(sub_table, sub_module):
     if figure_type == None and data_type == "csv":
         x_type, y_type = sub_record["draw_parameters"].values[0].split(",")
         origin_data = pd.read_csv(Path(MAIN_PATH) / sub_table["test_data"])
-        result = {"x": x_type, "y": y_type,
-                  "plot_title": plot_title, "origin_data": origin_data}
+        result = {
+            "x": x_type,
+            "y": y_type,
+            "plot_title": plot_title,
+            "origin_data": origin_data
+        }
 
         return result
 
