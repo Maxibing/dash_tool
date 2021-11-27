@@ -17,6 +17,7 @@ from dash.dependencies import Input, Output  # 回调
 from pathlib import Path
 from global_parameters import *
 from mysql_operation import *
+from functools import partial
 
 # 获取菜单
 DATA_SUMMARY = get_category_summary(mysql_connect())
@@ -40,17 +41,20 @@ app.layout = html.Div(children=[
         html.Div(html.Label("数据选择"), style={
             'font-size': '25',
         }),
-        # 数据选择框
-        html.Div(dcc.Dropdown(id="DataType",
-                              options=[{
-                                  'label': i,
-                                  'value': i
-                              } for i in DATA_TYPE_CHECKLIST.keys()],
-                              value=list(DATA_TYPE_CHECKLIST.keys())[0]),
-                 style={
-                     'margin-top': 10,
-                     'width': '10%'
-                 }),
+        # 数据选择框，下拉框形式显示所有主模块(已去重)，数据库存储位置：[summary_test_data_category]-[main_module]
+        html.Div(
+            dcc.Dropdown(
+                id="DataType",
+                options=[{
+                    'label': i,
+                    'value': i
+                } for i in DATA_TYPE_CHECKLIST.keys()],
+                # 默认选中第一个主模块
+                value=list(DATA_TYPE_CHECKLIST.keys())[0]),
+            style={
+                'margin-top': 10,
+                'width': '10%'
+            }),
     ]),
     # 分隔线
     html.Hr(),
@@ -75,19 +79,19 @@ app.layout = html.Div(children=[
 '''
 
 
-# 第一级选项回调
+# 第一级选项回调，根据主模块筛选对应子模块，数据库存储位置：[summary_test_data_category]-[sub_module]
 @app.callback(Output('l1_options', 'options'), [Input('DataType', 'value')])
 def l1_options_update(DataType):
     return [{'label': i, 'value': i} for i in DATA_TYPE_CHECKLIST[DataType]]
 
 
-# 第一级选项默认值
+# 第一级选项默认值，默认选中当前主模块下的第一个子模块
 @app.callback(Output('l1_options', 'value'), [Input('DataType', 'value')])
 def l1_value_update(DataType):
     return DATA_TYPE_CHECKLIST[DataType][0]
 
 
-# 表格回调
+# 表格回调，显示子模块列表详细内容，数据库存储名就是sub_module字段的值
 @app.callback(Output('table', 'columns'), Output('table', 'data'),
               Output('table', 'selected_rows'), [Input('l1_options', 'value')])
 def table_update(l1_options):
@@ -101,28 +105,60 @@ def table_update(l1_options):
         return [], [], []
 
 
-# 更新绘图
+# 更新绘图，勾选的测试数据变化时更新
 @app.callback(Output("data_display", "figure"), [
     Input("table", "selected_rows"),
     Input("table", "data"),
     Input('l1_options', 'value')
 ])
 def data_graph_update(selected_rows, data, sub_module):
+    # 如果没有勾选任何数据，则返回空
     if len(selected_rows) == []:
         return
+    # 根据勾选的子模块，查找记录
+    sub_record = DATA_SUMMARY[DATA_SUMMARY["sub_module"] == sub_module]
+    # 获取绘图类型
+    figure_type = sub_record["figure_type"].values[0]
+    # 没有对应的绘图函数 ，直接返回
+    if not DRAW_FUNCTIONS.__contains__(figure_type):
+        return
+    # 有对应的绘图函数，调用对应的绘图函数并返回
+    _draw_func = partial(eval(DRAW_FUNCTIONS[figure_type]), selected_rows,
+                         data, sub_record)
 
+    return _draw_func()
+
+
+'''
+    绘图函数定义
+'''
+
+
+# 折线图
+def figure_lines(selected_rows, data, sub_record):
+    # 获取测试数据类型
+    data_type = sub_record["data_type"].values[0]
+    # 获取折线标题
+    plot_title = sub_record["plot_title"].values[0]
+    # x,y轴对应参数
+    x_type, y_type = sub_record["draw_parameters"].values[0].split(",")
+    # 拼接绘图参数
     traces = []
+    # 按勾选的测试数据分别绘制折线图
     for i in selected_rows:
-        _data = get_draw_data(data[i], sub_module)
-        _x = _data["origin_data"][_data["x"]]
-        _name = data[i][_data["plot_title"]]
-
+        # 获取测试数据
+        _test_data = partial(eval(DATA_GET_FUCNTIONS[data_type]), data[i])()
+        # 如果获取测试数据失败，则跳过该条数据记录
+        if _test_data.empty:
+            continue
+        # 添加折线图
         traces.append(
-            go.Scatter(x=_data["origin_data"][_data["x"]],
-                       y=_data["origin_data"][_data["y"]],
-                       name=data[i][_data["plot_title"]]))
-    xy_title = DATA_SUMMARY[DATA_SUMMARY["sub_module"] ==
-                            sub_module]["draw_parameters"].values[0].split(",")
+            go.Scatter(x=_test_data[x_type],
+                       y=_test_data[y_type],
+                       name=plot_title))
+    # x,y轴名称
+    xy_title = [x_type, y_type]
+    # x,y轴格式及绘图标题
     design = go.Layout(xaxis=dict(title=xy_title[0],
                                   titlefont=dict(color="red",
                                                  family="STHeiti",
@@ -131,32 +167,28 @@ def data_graph_update(selected_rows, data, sub_module):
                                   titlefont=dict(color="red",
                                                  family="STHeiti",
                                                  size=15)),
-                       title=dict(text=sub_module,
+                       title=dict(text=sub_record["sub_module"].values[0],
                                   font=dict(color="green",
                                             family="STHeiti",
                                             size=20)))
 
+    # 返回绘图数据
     return dict(data=traces, layout=design)
 
 
-def get_draw_data(sub_table, sub_module):
-    sub_record = DATA_SUMMARY[DATA_SUMMARY["sub_module"] == sub_module]
-    figure_type = sub_record["figure_type"].values[0]
-    data_type = sub_record["data_type"].values[0]
-    plot_title = sub_record["plot_title"].values[0]
-    if figure_type == None and data_type == "csv":
-        x_type, y_type = sub_record["draw_parameters"].values[0].split(",")
-        origin_data = pd.read_csv(Path(MAIN_PATH) / sub_table["test_data"])
-        result = {
-            "x": x_type,
-            "y": y_type,
-            "plot_title": plot_title,
-            "origin_data": origin_data
-        }
+'''
+    测试数据获取
+'''
 
-        return result
+
+def get_csv_data(sub_table):
+    # 尝试获取测试数据，如果获取失败，则返回空df
+    try:
+        return pd.read_csv(Path(MAIN_PATH) / sub_table["test_data"])
+    except:
+        return pd.DataFrame()
 
 
 if __name__ == '__main__':
-    app.run_server(host="192.168.29.128", port=8010, debug=True)
+    app.run_server(host="192.168.29.128", port=8040, debug=True)
     # app.run_server(port=8023, debug=True)

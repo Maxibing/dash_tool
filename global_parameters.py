@@ -18,16 +18,8 @@ DASH_TITLE = "NurLink 测试数据"
 # 存储地址
 MAIN_PATH = "D:\project\dash_tool"
 
-# 一级菜单
-# DATA_TYPE_CHECKLIST = ["ADC", "ThroughPut"]
+# 绘图函数
+DRAW_FUNCTIONS = {"lines": "figure_lines"}
 
-# 二级菜单，与一级菜单元素对应
-# ADC = ["ADC_CHANNEL_1", "ADC_VDD"]
-# ThroughPut = ["UpLink", "DownLink"]
-
-# 表格显示的测试数据源，与耳机菜单元素对应
-# ADC_CHANNEL_1 = r"D:\project\dash_tool\SENSOR.csv"
-# ADC_VDD =  r"D:\project\dash_tool\VDD.csv"
-
-# ADC_CHANNEL_1 = r"C:\Users\DELL\Desktop\dash\dash_tool-master\SENSOR.csv"
-# ADC_VDD =  r"C:\Users\DELL\Desktop\dash\dash_tool-master\VDD.csv"
+# 测试数据获取函数
+DATA_GET_FUCNTIONS = {"csv": "get_csv_data"}
