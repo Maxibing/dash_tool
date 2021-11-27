@@ -22,9 +22,12 @@ from functools import partial
 # 获取菜单
 DATA_SUMMARY = get_category_summary(mysql_connect())
 DATA_TYPE_CHECKLIST = get_main_and_sub_module(DATA_SUMMARY)
-'''
-页面布局
-'''
+
+
+##########################################################################################
+'''页面布局'''
+##########################################################################################
+
 app = dash.Dash()
 app.layout = html.Div(children=[
     # 标题
@@ -74,10 +77,11 @@ app.layout = html.Div(children=[
     # 画图
     dcc.Graph(id="data_display", figure={})
 ])
-'''
-回调函数
-'''
 
+
+##########################################################################################
+'''回调函数'''
+##########################################################################################
 
 # 第一级选项回调，根据主模块筛选对应子模块，数据库存储位置：[summary_test_data_category]-[sub_module]
 @app.callback(Output('l1_options', 'options'), [Input('DataType', 'value')])
@@ -129,10 +133,9 @@ def data_graph_update(selected_rows, data, sub_module):
     return _draw_func()
 
 
-'''
-    绘图函数定义
-'''
-
+##########################################################################################
+'''绘图函数定义'''
+##########################################################################################
 
 # 折线图
 def figure_lines(selected_rows, data, sub_record):
@@ -176,10 +179,9 @@ def figure_lines(selected_rows, data, sub_record):
     return dict(data=traces, layout=design)
 
 
-'''
-    测试数据获取
-'''
-
+##########################################################################################
+'''测试数据获取'''
+##########################################################################################
 
 def get_csv_data(sub_table):
     # 尝试获取测试数据，如果获取失败，则返回空df
